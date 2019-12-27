@@ -64,8 +64,8 @@ App.jsを以下のように変更してみてください.
 このようにReactにはホットリロードという機能がありコードが変更されセーブされると自動的に表示を更新してくれます.  
 
 ```js:app.js
-import React from 'react';
-import './App.css';
+import React from 'react'
+import './App.css'
 
 function App() {
   return (
@@ -74,10 +74,10 @@ function App() {
         <p>Hello Tommy</p>
       </header>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
 ```
 
 ## コードの説明
@@ -89,6 +89,178 @@ export default App;
 見た目はHTMLとほぼ変わりませんが, JSXという記法がReactでは採用されています.  
 HTMLと違い内部で変数を使用したり, プログラムを埋め込むことができます.  
 
-## ~Break Time~
+## Break Time
 セミコロン `;` はなくてもよいです.  
 個人的には書かないほうがきれいで見やすいと感じます.  
+
+## コンポーネントとは
+コンポーネントとはUIを構築する部品のことです.  
+コンポーネントを組合せてUIを作成していきます.  
+
+## 1章完成形
+![1章完成形](./image/task_app1.png)
+## UIの作成
+今回は material-ui というフレームワークを用いてUIを作成します.  
+> https://material-ui.com/  
+
+material-uiとフォントの導入をします.
+
+```zsh
+yarn add @material-ui/core
+yarn add @material-ui/icons
+yarn add typeface-roboto
+```
+
+App.jsを書き換えます.
+
+```js
+import React from 'react'
+import 'typeface-roboto'
+// 必要なコンポーネントをインポートする
+import { Button, TextField, Box, Container, CssBaseline, List, ListItem, ListItemText } from '@material-ui/core'
+
+function App() {
+  return (
+    <Container 
+      component='main' 
+      maxWidth='xs'
+    >
+      <CssBaseline />
+      <Box
+        mt={5}
+        display='flex'
+        justifyContent='space-around'
+      >
+        <TextField
+          label='タイトル'
+        />
+        <Button
+          variant='contained'
+          color='primary'
+        >
+          作成
+        </Button>
+      </Box>
+      <List
+        style={{ marginTop: '48px' }}
+      >
+        <ListItem>
+          <ListItemText>タスク1</ListItemText>
+        </ListItem>
+        <ListItem>
+          <ListItemText>タスク2</ListItemText>
+        </ListItem>
+      </List>
+    </Container>
+  )
+}
+
+export default App
+```
+
+## タスクの管理
+UIができたので次はデータを追加していきます.  
+コンポーネントは state と呼ばれる状態を持つことができます.  
+```js
+// stateを作成するために追加
+import React, { useState } from 'react'
+import 'typeface-roboto'
+import { Button, TextField, Box, Container, CssBaseline, List, ListItem, ListItemText } from '@material-ui/core'
+
+function App() {
+  // stateの作成
+  // useStateの引数が初期値
+  const [tasks, setTasks] = useState([
+    {
+      id: 1,
+      title: 'Reactのお勉強',
+    }
+  ])
+
+  return (
+    <Container 
+      component='main'
+      maxWidth='xs'
+    >
+      {/* 中略 */}
+    </Container>
+  )
+}
+
+export default App
+```
+
+## タスクの表示
+tasksは配列なのでmap関数を使用して取り出します.  
+
+```js
+// 略
+function App() {
+  // 略
+  return (
+    <Container 
+      component='main'
+      maxWidth='xs'
+    >
+      {/* 中略 */}
+     <List
+        style={{ marginTop: '48px' }}
+      >
+        {tasks.map(task => (
+          // keyは重複しない値にする
+          <ListItem key={task.id}>
+            <ListItemText>{task.title}</ListItemText>
+          </ListItem>
+        ))}
+      </List> 
+    </Container>
+  )
+}
+
+export default App
+```
+
+## タスクの追加
+TextFieldからタスクを追加できるようにします.  
+TextFieldに入力されたタスク名を取得する必要があるのでstateを追加します.  
+
+```js
+// 略
+
+function App() {
+  const [tasks, setTasks] = useState([
+    {
+      id: 1,
+      title: 'Reactのお勉強',
+    }
+  ])
+  // stateの追加
+  const [task_title, setTask_title] = useState('')
+  return (
+    // 略
+    <TextField
+      label="タイトル"
+      value={task_title}
+      // 入力が変更されるたびにtask_titleに代入する
+      onChange={e => setTask_title(e.target.value)}
+    />
+    <Button
+      variant='contained'
+      color='primary'
+      // task_titleが空のときはボタンを押せないようにする
+      disabled={task_title === '' ? true : false}
+      // ボタンがクリックされるとtasks配列に追加し、task_titleを初期化する
+      onClick={() => {
+        setTasks([...tasks, {
+          id: tasks.length + 1,
+          title: task_title,
+        }])
+        setTask_title('')
+      }}>
+        作成
+    </Button>
+  )
+}
+
+export default App
+```
